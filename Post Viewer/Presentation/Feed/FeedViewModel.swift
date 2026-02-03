@@ -64,7 +64,7 @@ final class FeedViewModel {
     func detailViewModel(for indexPath: IndexPath) -> PostDetailViewModel? {
         guard indexPath.item < posts.count else { return nil }
         let post = posts[indexPath.item]
-        return PostDetailViewModel()
+        return PostDetailViewModel(postId: post.postId, service: service)
     }
 
     // MARK: - Helpers
