@@ -42,7 +42,7 @@ final class MainCoordinator: PostListCoordinator {
     }
     
     func showPostDetail(for viewModel: PostDetailViewModel) {
-        let detailVC = PostDetailViewController()
+        let detailVC = PostDetailViewController(viewModel: viewModel, imageLoader: imageLoader)
         navigationController.pushViewController(detailVC, animated: true)
     }
 }
