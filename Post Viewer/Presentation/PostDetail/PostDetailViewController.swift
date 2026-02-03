@@ -21,6 +21,7 @@ final class PostDetailViewController: UIViewController {
     private let likesLabel = UILabel()
     private let dateLabel = UILabel()
     private let activityIndicator = UIActivityIndicatorView(style: .large)
+    private let imageActivityIndicator = UIActivityIndicatorView(style: .large)
 
     init(viewModel: PostDetailViewModel, imageLoader: ImageLoaderProtocol) {
         self.viewModel = viewModel
@@ -63,6 +64,14 @@ final class PostDetailViewController: UIViewController {
         imageView.clipsToBounds = true
         imageView.heightAnchor.constraint(equalToConstant: 220).isActive = true
         imageView.backgroundColor = .secondarySystemBackground
+
+        imageActivityIndicator.hidesWhenStopped = true
+        imageActivityIndicator.translatesAutoresizingMaskIntoConstraints = false
+        imageView.addSubview(imageActivityIndicator)
+        NSLayoutConstraint.activate([
+            imageActivityIndicator.centerXAnchor.constraint(equalTo: imageView.centerXAnchor),
+            imageActivityIndicator.centerYAnchor.constraint(equalTo: imageView.centerYAnchor)
+        ])
 
         titleLabel.font = UIFont.preferredFont(forTextStyle: .title2)
         titleLabel.numberOfLines = 0
@@ -133,11 +142,16 @@ final class PostDetailViewController: UIViewController {
             self.dateLabel.text = dateText
 
             if let url = detail.postImage {
+                self.imageView.image = nil
+                self.imageActivityIndicator.startAnimating()
                 self.imageLoader.loadImage(from: url) { [weak self] image in
-                    self?.imageView.image = image
+                    guard let self = self else { return }
+                    self.imageView.image = image
+                    self.imageActivityIndicator.stopAnimating()
                 }
             } else {
                 self.imageView.image = nil
+                self.imageActivityIndicator.stopAnimating()
             }
         }
 
