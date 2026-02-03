@@ -13,10 +13,14 @@ final class PostsService: PostsServiceProtocol {
     static let shared = PostsService()
 
     private let session: URLSession
-    private let baseURL = URL(string: "https://raw.githubusercontent.com/anton-natife/jsons/master/api/")!
+    private let baseURLString = "https://raw.githubusercontent.com/anton-natife/jsons/master/api/"
     
-    private func makeURL(for endpoint: Endpoints) -> URL {
-        baseURL.appendingPathComponent(endpoint.path)
+    private func makeURL(for endpoint: Endpoints) -> URL? {
+        if let base = URL(string: baseURLString) {
+            return base.appendingPathComponent(endpoint.path)
+        } else {
+            return nil
+        }
     }
 
     init(session: URLSession = .shared) {
@@ -26,7 +30,14 @@ final class PostsService: PostsServiceProtocol {
     func fetchFeed(completion: @escaping (Result<[Post], APIError>) -> Void) {
         let logger = self.logger
         
-        let url = makeURL(for: .feed)
+        guard let url = makeURL(for: .feed) else {
+            logger.error("Failed to create URL from string: \(self.baseURLString)\(Endpoints.feed.path)")
+            
+            Task { @MainActor in
+                completion(.failure(.invalidURL("\(baseURLString)\(Endpoints.feed.path)")))
+            }
+            return
+        }
         
         session.dataTask(with: url) { data, response, error in
             if let error = error {
@@ -84,7 +95,14 @@ final class PostsService: PostsServiceProtocol {
         let logger = self.logger
         let endpoint = Endpoints.postDetail(id: id)
         
-        let url = makeURL(for: endpoint)
+        guard let url = makeURL(for: endpoint) else {
+            logger.error("Failed to create URL from string: \(self.baseURLString)\(endpoint.path)")
+            
+            Task { @MainActor in
+                completion(.failure(.invalidURL("\(baseURLString)\(endpoint.path)")))
+            }
+            return
+        }
 
         session.dataTask(with: url) { data, response, error in
             
