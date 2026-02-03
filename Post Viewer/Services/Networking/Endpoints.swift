@@ -17,5 +17,4 @@ enum Endpoints {
        case .postDetail(let id): "posts/\(id).json"
         }
     }
-
 }
